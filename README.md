@@ -7,5 +7,5 @@ both methodologies and identify more realistic ways to estimate exposure and und
 
 - The folder 'Model' has the necessary scripts to estimate exposure. All functions must be run at the same time for it to work correctly.
 - The folder 'Example script' has example scripts of the most important functions to calculate exposure.
-- The folder 'Data' contains example datasets in shapefile format to test the exposure function. These files contain information on hourly concentrations of PM2.5 in the Metropolitan Area of Mendoza, Argentina.
+- The folder 'Data' contains example datasets in shapefile format to test the exposure function. These files contain information on hourly concentrations of PM2.5 in the Mendoza Metropolitan Area, Argentina.
 - The folder 'Output' shows examples of outputs from some of the displayed functions.
