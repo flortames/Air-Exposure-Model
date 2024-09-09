@@ -1,3 +1,7 @@
+
+
+
+
 hourly_grid <- function(hour, time_format,dir){
   input_hour <- as.POSIXct(strptime(hour, format = time_format))
   hour_exposure<- lubridate::hour(input_hour)

@@ -1,4 +1,5 @@
-trajectories_tomtom <- function(origin,dest,mode,hour_trajectory=hour,key){
+
+trajectories_tomtom <- function(origin,dest,mode,hour_trajectory,key){
   num_alternative <- 5
 
   #---  hour de departure
@@ -6,7 +7,7 @@ trajectories_tomtom <- function(origin,dest,mode,hour_trajectory=hour,key){
   hour_trajectory<-as.POSIXct(strptime(hour_trajectory, format = "%Y-%m-%d %H:%M:%S"))
 
   day <- substr (hour_trajectory,1,10)
-  hour <- substr(hour_trajectory,12,13)
+  hours <- substr(hour_trajectory,12,13)
   minutes <- substr(hour_trajectory,15,16)
   zone_tot <- substr(format(hour_trajectory, "%z"),1,3)
 
@@ -14,11 +15,11 @@ trajectories_tomtom <- function(origin,dest,mode,hour_trajectory=hour,key){
     
     zone <- substr(format(hour_trajectory, "%z"),1,3)
     
-    hour_format <- paste(day,"T",hour,"%3A",minutes,"%3A00",zone,"%3A00",sep = "")
+    hour_format <- paste(day,"T",hours,"%3A",minutes,"%3A00",zone,"%3A00",sep = "")
   }else{
     
     zone <- substr(format(hour_trajectory, "%z"),2,3)
-    hour_format <- paste(day,"T",hour,"%3A",minutes,"%3A00%2B",zone,"%3A00",sep = "")
+    hour_format <- paste(day,"T",hours,"%3A",minutes,"%3A00%2B",zone,"%3A00",sep = "")
     
   }
  

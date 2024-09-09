@@ -1,9 +1,9 @@
 ## ----------  Alternativas de viaje 
-alternative_trajectories <- function(origin,dest,mode,dir,key,output,hour = NULL,gridID, shapeValue, units, pollutant){
+alternative_trajectories <- function(origin,dest,mode,dir,key,output,hours = NULL,gridID, shapeValue, units, pollutant){
 # ------------             Search of trajectories      ---------------- 
 # Search for alternative according to tom-tom
 
-  trajectory <- trajectories_tomtom(origin,dest,mode = mode, hour_trajectory = hour, key)
+  trajectory <- trajectories_tomtom(origin,dest,mode = mode, hour_trajectory = hours, key)
 
   # ------------             PASO DE PUNTOS A LINEAS      ----------------
   data_trajectory <- trajectory # renombramos
@@ -89,23 +89,29 @@ alternative_trajectories <- function(origin,dest,mode,dir,key,output,hour = NULL
 
     # ------------ 01. FASTER ROUTE
     faster_route <- trajectory[trajectory$travelTimeInMinutes == min(trajectory$travelTimeInMinutes),]
+    faster_route <- faster_route[faster_route$alternative == faster_route$alternative[1],]
     faster_route$type <- "fast" 
     # ------------ 02. SHORTER ROUTE
     shorter_route <- trajectory[trajectory$lengthInKM == min(trajectory$lengthInKM),]
+    shorter_route <- shorter_route[shorter_route$alternative == shorter_route$alternative[1],]
     shorter_route$type <- "short"
     # ------------ 03. LESS CONTAMINATED ROUTE
     less_polluted_route<- trajectory[trajectory$daily_pol_value_mean == min(trajectory$daily_pol_value_mean),]
+    less_polluted_route <- less_polluted_route[less_polluted_route$alternative == less_polluted_route$alternative[1],]
     less_polluted_route$type <- "lesspol"
     
     # ------------ 04. MORE CONTAMINATED ROUTE
     more_polluted_route <- trajectory[trajectory$daily_pol_value_mean == max(trajectory$daily_pol_value_mean),]
+    more_polluted_route <- more_polluted_route[more_polluted_route$alternative == more_polluted_route$alternative[1],]
     more_polluted_route$type <- "morepol"
     # ------------ 0.5 MORE EXPOSURE
     more_exposure_route <- trajectory[trajectory$exposure_value_mean == max(trajectory$exposure_value_mean),]
+    more_exposure_route <- more_exposure_route[more_exposure_route$alternative == more_exposure_route$alternative[1],]
     more_exposure_route$type <- "moreexpos"
     
     # ------------ 0.7 LESS EXPOSURE
     less_exposure_route <- trajectory[trajectory$exposure_value_mean == min(trajectory$exposure_value_mean),]
+    less_exposure_route <- less_exposure_route[less_exposure_route$alternative == less_exposure_route$alternative[1],]
     less_exposure_route$type <- "lessexpos"
     
     df_output <- data.frame()
@@ -289,6 +295,7 @@ alternative_trajectories <- function(origin,dest,mode,dir,key,output,hour = NULL
            alternative<-group_dat_output[[p]][["alternative"]][1]
            type <- group_dat_output[[p]][["type"]][1]
            value <- group_dat_output[[p]][["exposure_value_mean"]][1] #group_dat_output[[p]][["value"]][1]
+           daily_pol_value_mean <- group_dat_output[[p]][["daily_pol_value_mean"]][1] #group_dat_output[[p]][["value"]][1]
            
            
            data_frame_output <- data.frame( origin,destination ,departureTime, 
@@ -299,7 +306,8 @@ alternative_trajectories <- function(origin,dest,mode,dir,key,output,hour = NULL
                                             travelTimeInMinutes ,                   
                                             #liveTrafficIncidentstravelTimeInMinutes,
                                             #historicTraffictravelTimeInMinutes,
-                                            #noTraffictravelTimeInMinutes,           
+                                            #noTraffictravelTimeInMinutes,
+                                            daily_pol_value_mean,
                                             alternative, type, value)
            names (data_frame_output)<- c("origin","destination" ,"departureTime", 
                                          "arrivalTime", "lengthInKM", 
@@ -309,7 +317,8 @@ alternative_trajectories <- function(origin,dest,mode,dir,key,output,hour = NULL
                                          "travelTimeInMinutes",                   
                                          #"liveTrafficIncidentstravelTimeInMinutes",
                                          #"historicTraffictravelTimeInMinutes",
-                                         #"noTraffictravelTimeInMinutes",           
+                                         #"noTraffictravelTimeInMinutes", 
+                                         "daily_pol_value_mean",
                                          "alternative","type","value")
            
            id_df_output <- rbind(id_df_output,data_frame_output)

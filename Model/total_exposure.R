@@ -21,7 +21,7 @@ total_exposure <- function (travel_list, mode, dir,key,selection,output_exp,
       # If i=1 consider the departure time entered in the function
       origin_coords <- paste((travel_list[i,2]),(travel_list[i,1]),sep = ",")
       destination_coords <- paste((travel_list[i+1,2]),(travel_list[i+1,1]),sep = ",")
-      selection_route <-  alternative_trajectories (origin=origin_coords,dest=destination_coords,mode=mode[i], dir,key=key,output = "df",hour = departure_time_home,gridID,shapeValue, units)
+      selection_route <-  alternative_trajectories (origin=origin_coords,dest=destination_coords,mode=mode[i], dir,key=key,output = "df",hours = departure_time_home,gridID,shapeValue, units)
       
     }
     
@@ -29,13 +29,13 @@ total_exposure <- function (travel_list, mode, dir,key,selection,output_exp,
       # If the coordinates correspond to the last point entered, destination returns to point 1 (home)
       origin_coords <- paste((travel_list[i,2]),(travel_list[i,1]),sep = ",")
       origin_coords_1 <- paste((travel_list[1,2]),(travel_list[1,1]),sep = ",")
-      selection_route <-  alternative_trajectories (origin=origin_coords,dest=origin_coords_1,mode=mode[i], dir,key=key,output = "df",hour =prox_hour_output,gridID,shapeValue,units )
+      selection_route <-  alternative_trajectories (origin=origin_coords,dest=origin_coords_1,mode=mode[i], dir,key=key,output = "df",hours =prox_hour_output,gridID,shapeValue,units )
       
     }else {
       
       origin_coords <- paste((travel_list[i,2]),(travel_list[i,1]),sep = ",")
       destination_coords <- paste((travel_list[i+1,2]),(travel_list[i+1,1]),sep = ",")
-      selection_route <-  alternative_trajectories (origin=origin_coords,dest=destination_coords,mode=mode[i], dir,key=key,output = "df",hour = prox_hour_output,gridID,shapeValue,units )
+      selection_route <-  alternative_trajectories (origin=origin_coords,dest=destination_coords,mode=mode[i], dir,key=key,output = "df",hours = prox_hour_output,gridID,shapeValue,units )
       
     }
     # --------select the chosen alternative
@@ -73,7 +73,7 @@ total_exposure <- function (travel_list, mode, dir,key,selection,output_exp,
     
     # ------- Data trajectories
     
-    trip_time <- selection_route$travelTimeInSeconds[1] # in minutes
+    trip_time <- selection_route$travelTimeInMinutes[1] # in minutes
     trip_distance <- selection_route$lengthInMeters[1]
     trip_conc <- mean (selection_route$daily_pol_value_mean, na.rm = T)
     # ------- Data origin

@@ -12,12 +12,15 @@ dest <- "-32.90212,-68.761"
 mode <- "car"
 # 04. Date and hour of departure to destination
 hour_trajectory <- "2019-08-01 15:50:00 -03"
+hour_trajectory <- hour_time
 # 05. Check and set the time zone
 Sys.setenv(TZ = "America/Argentina/Buenos_Aires")
 
+
 # 06. TomTom key
-#key <- xxxx
+key <- "YOdvX5qKwpk9YRl9v0JzqC5qSYNOwbDc"###
 
 # Run example
 test <- trajectories_tomtom(origin, dest, mode, hour_trajectory, key)
 head(test,2)
+

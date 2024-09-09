@@ -9,7 +9,7 @@ temporary_grid_search <- function(start_hour, end_hour=NULL,dir,time_format, gri
   #  --- 
   if (is.null(end_hour)){
 
-    df_start_grids <- sf::st_read(hourly_grid(start_hour, time_format = time_format,dir),quiet = TRUE)
+    df_start_grids <- sf::st_read(hourly_grid(hour = start_hour, time_format = time_format,dir),quiet = TRUE)
     df_start_grid <- sf::st_transform(df_start_grids,crs = 4326)# Always transform the CRS in 4326
     names(df_start_grid)[names(df_start_grid) == gridID] <- "ID"
     #ID <- st_drop_geometry(df_start_grid)[gridID]
