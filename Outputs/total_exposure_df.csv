@@ -1,3 +1,0 @@
-"","lat_origin","long_origin","lat_destination","long_destination","conc_origin","trip_conc","conc_destination","trip_time","destination_time","time_origin","i","exp_tot_trajectory","exp_tot_destination","exp_tot_origin","exp_tot","exp_tot_sum","route","mode"
-"1",-32.86617,-68.84699,-32.88419,-68.81881,0.269472666666667,3.78,3.27684,12.58,300,469.983333333333,1,47.5524,983.052,126.647662122222,3.62,19.61,"route 1","car"
-"2",-32.88419,-68.81881,-32.86617,-68.84699,NA,1.18,0.007535962454545,12.4,645.583333333333,NA,2,14.632,4.86509176128001,NA,3.62,19.61,"route 2","car"
