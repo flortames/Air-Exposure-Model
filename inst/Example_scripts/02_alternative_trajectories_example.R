@@ -12,7 +12,8 @@ origin <-"-32.895559140440355,-68.86202901786527"
 dest <- "-32.90212,-68.761" 
 dest <- "-32.887536148728756,-68.83483295230235"
 # 03. Transport
-mode <- "car"
+mode <- "car" #bicyle, motorcycle, pedestrian, bus, trunk
+
 # 04. Date and hour of departure to destination
 # 05. Check and set the time zone
 Sys.setenv(TZ = "America/Argentina/Buenos_Aires")
