@@ -14,6 +14,8 @@
 #'
 #' @export
 
+# Function to convert hours to minutes
+
 function_hours <- function(minutes) {
   minutes <- round(minutes)
 

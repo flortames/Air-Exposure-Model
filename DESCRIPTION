@@ -1,5 +1,5 @@
 Package: AirExposure
-Title: Air Pollution Exposure Assessment Using Mobility Data.
+Title: Air Pollution Exposure Assessment Using Mobility Data
 Version: 0.0.0.9000
 Authors@R: c(
     person(
@@ -24,12 +24,12 @@ Authors@R: c(
       family = "Rigalli",
       role = "aut"
     )
-    )
+  )
 Description: Provides tools to estimate personal exposure to air pollutants
-based on individual mobility patterns. The package integrates route
-information obtained from the TomTom Routing API with gridded air pollution
-data to estimate exposure along travel trajectories or under static exposure
-assumptions.
+  based on individual mobility patterns. The package integrates route
+  information obtained from the TomTom Routing API with gridded air pollution
+  data to estimate exposure along travel trajectories or under static exposure
+  assumptions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

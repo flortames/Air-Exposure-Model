@@ -77,26 +77,6 @@
 #'
 #' @export
 
-if (!is.data.frame(travel_list)) {
-  stop("'travel_list' must be a data.frame.")
-}
-
-if (nrow(travel_list) < 2) {
-  stop("'travel_list' must contain at least two locations.")
-}
-
-if (length(mode) != nrow(travel_list)) {
-  stop("'mode' must have one element for each trip.")
-}
-
-if (!output_exp %in% c("df", "plot", "polyline")) {
-  stop("'output_exp' must be one of 'df', 'plot' or 'polyline'.")
-}
-
-if (!dir.exists(dir)) {
-  stop("The directory specified in 'dir' does not exist.")
-}
-
 total_exposure <- function(
   travel_list,
   mode,
@@ -111,6 +91,28 @@ total_exposure <- function(
   gridID,
   units
 ) {
+  #Check input
+
+  if (!is.data.frame(travel_list)) {
+    stop("'travel_list' must be a data.frame.")
+  }
+
+  if (nrow(travel_list) < 2) {
+    stop("'travel_list' must contain at least two locations.")
+  }
+
+  if (length(mode) != nrow(travel_list)) {
+    stop("'mode' must have one element for each trip.")
+  }
+
+  if (!output_exp %in% c("df", "plot", "polyline")) {
+    stop("'output_exp' must be one of 'df', 'plot' or 'polyline'.")
+  }
+
+  if (!dir.exists(dir)) {
+    stop("The directory specified in 'dir' does not exist.")
+  }
+
   df_output <- data.frame()
   rbind_df_1 <- data.frame()
 
