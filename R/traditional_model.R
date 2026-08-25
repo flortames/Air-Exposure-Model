@@ -53,12 +53,20 @@ traditional_model <- function(
     stop("Directory specified in 'dir' does not exist.")
   }
 
+  if (is.na(as.Date(date, format = "%Y-%m-%d"))) {
+    stop("'date' must have format 'YYYY-mm-dd'.")
+  }
+
   required_columns <- c("longitude", "latitude")
 
   if (!all(required_columns %in% names(origin_point))) {
     stop(
       "'origin_point' must contain the columns 'longitude' and 'latitude'."
     )
+  }
+
+  if (nrow(origin_point) != 1) {
+    stop("'origin_point' must contain exactly one location.")
   }
 
   # Convert the origin point to a spatial object
@@ -92,10 +100,18 @@ traditional_model <- function(
 
   # Identify the grid cell containing the origin point
 
-  intersection_point <- sf::st_intersection(
-    origin_point,
-    grid_search
+  intersection_point <- suppressWarnings(
+    sf::st_intersection(
+      origin_point,
+      grid_search
+    )
   )
+
+  if (nrow(intersection_point) == 0) {
+    stop(
+      "The origin point does not intersect any grid cell."
+    )
+  }
 
   # Calculate daily exposure (24 h)
 
