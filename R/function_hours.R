@@ -17,6 +17,22 @@
 # Function to convert hours to minutes
 
 function_hours <- function(minutes) {
+  if (length(minutes) != 1) {
+    stop("'minutes' must be a single numeric value.")
+  }
+
+  if (is.na(minutes)) {
+    stop("'minutes' cannot be NA.")
+  }
+
+  if (!is.numeric(minutes)) {
+    stop("'minutes' must be numeric.")
+  }
+
+  if (minutes < 0) {
+    stop("'minutes' must be non-negative.")
+  }
+
   minutes <- round(minutes)
 
   hs_tot <- minutes / 60

@@ -89,6 +89,12 @@ points_to_line <- function(
 
   paths <- split(data, data[[id_field]])
 
+  if (any(vapply(paths, nrow, integer(1)) < 2)) {
+    stop(
+      "Each group specified in 'id_field' must contain at least two points."
+    )
+  }
+
   sp_lines <- sf::st_linestring(
     as.matrix(paths[[1]][, c(long, lat)])
   )

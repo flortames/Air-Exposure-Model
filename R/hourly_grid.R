@@ -26,6 +26,10 @@
 #' @export
 
 hourly_grid <- function(hour, time_format, dir) {
+  if (!is.character(hour) || length(hour) != 1) {
+    stop("'hour' must be a character string.")
+  }
+
   if (!dir.exists(dir)) {
     stop("Directory specified in 'dir' does not exist.")
   }
@@ -71,6 +75,12 @@ hourly_grid <- function(hour, time_format, dir) {
   searched_hour <- which(
     lubridate::hour(table_files) == hour_exposure
   )
+
+  if (length(searched_hour) == 0) {
+    stop(
+      "No shapefile was found for the requested date and hour."
+    )
+  }
 
   file <- table_files[searched_hour]
 

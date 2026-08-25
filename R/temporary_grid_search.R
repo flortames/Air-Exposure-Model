@@ -52,177 +52,121 @@ temporary_grid_search <- function(
   gridID,
   shapeValue
 ) {
-  # Retrieve the pollutant grid corresponding to the requested hour(s)
+  # Validate inputs
 
   if (!dir.exists(dir)) {
     stop("Directory specified in 'dir' does not exist.")
   }
 
-  trajectory_grid_rbind <- data.frame()
+  if (!is.character(gridID) || length(gridID) != 1) {
+    stop("'gridID' must be a single character value.")
+  }
 
-  # Start hour
+  if (!is.character(shapeValue) || length(shapeValue) != 1) {
+    stop("'shapeValue' must be a single character value.")
+  }
 
-  only_start_hour <- lubridate::hour(
-    as.POSIXct(
-      strptime(start_hour, format = time_format)
-    )
+  # Parse start time
+
+  start_time <- as.POSIXct(
+    strptime(start_hour, format = time_format)
   )
 
-  if (is.na(only_start_hour)) {
+  if (length(start_time) != 1 || is.na(start_time)) {
     stop("'start_hour' could not be parsed using 'time_format'.")
   }
 
-  # End hour
+  # Parse end time
 
-  if (!is.null(end_hour)) {
-    only_end_hour <- lubridate::hour(
-      as.POSIXct(
-        strptime(end_hour, format = time_format)
-      )
+  if (is.null(end_hour)) {
+    end_time <- start_time
+  } else {
+    end_time <- as.POSIXct(
+      strptime(end_hour, format = time_format)
     )
 
-    if (is.na(only_end_hour)) {
+    if (length(end_time) != 1 || is.na(end_time)) {
       stop("'end_hour' could not be parsed using 'time_format'.")
     }
+
+    if (end_time < start_time) {
+      stop("'end_hour' must not be earlier than 'start_hour'.")
+    }
   }
 
-  # Only one hour requested
+  # Generate every required hour, including periods crossing midnight
 
-  if (is.null(end_hour)) {
-    df_start_grids <- sf::st_read(
-      hourly_grid(
-        hour = start_hour,
-        time_format = time_format,
-        dir = dir
-      ),
+  requested_hours <- seq(
+    from = lubridate::floor_date(start_time, unit = "hour"),
+    to = lubridate::floor_date(end_time, unit = "hour"),
+    by = "hour"
+  )
+
+  grids <- vector("list", length(requested_hours))
+
+  for (i in seq_along(requested_hours)) {
+    hour_text <- format(
+      requested_hours[i],
+      format = "%Y-%m-%d %H:%M:%S"
+    )
+
+    grid_name <- hourly_grid(
+      hour = hour_text,
+      time_format = "%Y-%m-%d %H:%M:%S",
+      dir = dir
+    )
+
+    grid_path <- file.path(dir, grid_name)
+
+    grid <- sf::st_read(
+      grid_path,
       quiet = TRUE
     )
 
-    df_start_grid <- sf::st_transform(
-      df_start_grids,
-      crs = 4326
-    )
-
-    names(df_start_grid)[names(df_start_grid) == gridID] <- "ID"
-  } else if (only_start_hour == only_end_hour) {
-    # Start and end hours are the same
-
-    trajectory_grid <- sf::st_read(
-      hourly_grid(
-        hour = start_hour,
-        time_format = time_format,
-        dir = dir
-      ),
-      quiet = TRUE
-    )
-
-    salida <- sf::st_transform(
-      trajectory_grid,
-      crs = 4326
-    )
-
-    names(salida)[names(salida) == gridID] <- "ID"
-  } else {
-    # Average pollutant concentration across multiple hourly grids
-
-    for (j in only_start_hour:only_end_hour) {
-      if (j < 10) {
-        j_hour <- paste0("0", j)
-      } else {
-        j_hour <- j
-      }
-
-      zone <- substr(
-        start_hour,
-        nchar(start_hour) - 2,
-        nchar(start_hour)
-      )
-
-      day <- paste(
-        substr(start_hour, 1, 10),
-        paste0(j_hour, ":00:00"),
-        zone
-      )
-
-      trajectory_grid <- sf::st_read(
-        hourly_grid(
-          hour = day,
-          time_format = "%Y-%m-%d %H:%M:%S",
-          dir = dir
-        ),
-        quiet = TRUE
-      )
-
-      trajectory_grid$hour <- day
-
-      trajectory_grid_rbind <- rbind(
-        trajectory_grid_rbind,
-        trajectory_grid
+    if (!gridID %in% names(grid)) {
+      stop(
+        paste0(
+          "Column specified in 'gridID' was not found in ",
+          grid_name,
+          "."
+        )
       )
     }
 
-    # Group by grid cell and calculate the mean concentration
-
-    ID <- sf::st_drop_geometry(
-      trajectory_grid_rbind
-    )
-
-    names(ID) <- "ID"
-
-    trajectory_grid_rbind <- cbind(
-      trajectory_grid_rbind,
-      ID
-    )
-
-    data_grilla <- trajectory_grid_rbind |>
-      dplyr::group_by(ID) |>
-      dplyr::group_split()
-
-    df_grilla <- data.frame()
-
-    for (p in seq_along(data_grilla)) {
-      ID <- data_grilla[[p]][["ID"]][1]
-
-      value <- mean(
-        data_grilla[[p]][[shapeValue]],
-        na.rm = TRUE
-      )
-
-      geometry <- data_grilla[[p]][["geometry"]][1]
-
-      df <- data.frame(
-        ID = ID,
-        value = value,
-        geometry = geometry
-      )
-
-      df_grilla <- rbind(
-        df_grilla,
-        df
+    if (!shapeValue %in% names(grid)) {
+      stop(
+        paste0(
+          "Column specified in 'shapeValue' was not found in ",
+          grid_name,
+          "."
+        )
       )
     }
 
-    sf::st_write(
-      df_grilla,
-      "./temp/temp_grid.shp",
-      delete_layer = TRUE,
-      quiet = TRUE
-    )
+    names(grid)[names(grid) == gridID] <- "ID"
+    names(grid)[names(grid) == shapeValue] <- "value"
 
-    trajectory_grid <- sf::st_read(
-      "./temp/temp_grid.shp",
-      quiet = TRUE
-    )
+    grid <- sf::st_transform(grid, crs = 4326)
 
-    salida <- sf::st_transform(
-      trajectory_grid,
-      crs = 4326
-    )
+    grids[[i]] <- grid[, c("ID", "value")]
   }
 
-  if (is.null(end_hour)) {
-    return(df_start_grid)
-  } else {
-    return(salida)
+  # A single requested grid requires no averaging
+
+  if (length(grids) == 1) {
+    return(grids[[1]])
   }
+
+  # Combine grids and calculate the hourly mean for each cell
+
+  combined_grid <- do.call(rbind, grids)
+
+  output_grid <- combined_grid |>
+    dplyr::group_by(.data$ID) |>
+    dplyr::summarise(
+      value = mean(.data$value, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  return(output_grid)
 }

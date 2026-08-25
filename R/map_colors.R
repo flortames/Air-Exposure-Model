@@ -35,9 +35,41 @@
 # Assign AQI categories and colors to a pollutant grid
 
 map_colors <- function(grid, pollutant) {
-  if (pollutant == "PM2.5") {
-    print(c("The entered pollutant is:", pollutant))
+  if (!inherits(grid, "sf")) {
+    stop("'grid' must be an sf object.")
+  }
 
+  if (!"value" %in% names(grid)) {
+    stop("'grid' must contain a column named 'value'.")
+  }
+
+  if (!is.character(pollutant)) {
+    stop("'pollutant' must be a character string.")
+  }
+
+  if (length(pollutant) != 1) {
+    stop("'pollutant' must be a single character value.")
+  }
+
+  valid_pollutants <- c(
+    "PM2.5",
+    "PM10",
+    "CO",
+    "SO2",
+    "NO2",
+    "O3"
+  )
+
+  if (!pollutant %in% valid_pollutants) {
+    stop(
+      paste(
+        "'pollutant' must be one of:",
+        paste(valid_pollutants, collapse = ", ")
+      )
+    )
+  }
+
+  if (pollutant == "PM2.5") {
     grid$category <- dplyr::case_when(
       grid$value <= 12.1 ~ "Good",
       grid$value > 12.1 & grid$value <= 35.4 ~ "Moderate",
@@ -59,8 +91,6 @@ map_colors <- function(grid, pollutant) {
     )
   } else if (pollutant == "PM10") {
     # PM10 (μg/m3), 24-hour
-
-    print(c("The entered pollutant is:", pollutant))
 
     grid$category <- dplyr::case_when(
       grid$value <= 54 ~ "Good",
@@ -84,8 +114,6 @@ map_colors <- function(grid, pollutant) {
   } else if (pollutant == "CO") {
     # CO (ppm), 8-hour
 
-    print(c("The entered pollutant is:", pollutant))
-
     grid$category <- dplyr::case_when(
       grid$value <= 4.4 ~ "Good",
       grid$value > 4.4 & grid$value <= 9.4 ~ "Moderate",
@@ -107,8 +135,6 @@ map_colors <- function(grid, pollutant) {
     )
   } else if (pollutant == "SO2") {
     # SO2 (ppb), 1-hour
-
-    print(c("The entered pollutant is:", pollutant))
 
     grid$category <- dplyr::case_when(
       grid$value <= 35 ~ "Good",
@@ -139,8 +165,6 @@ map_colors <- function(grid, pollutant) {
   } else if (pollutant == "NO2") {
     # NO2 (ppb), 1-hour
 
-    print(c("The entered pollutant is:", pollutant))
-
     grid$category <- dplyr::case_when(
       grid$value <= 53 ~ "Good",
       grid$value > 53 & grid$value <= 100 ~ "Moderate",
@@ -160,10 +184,8 @@ map_colors <- function(grid, pollutant) {
       grid$category == "Very unhealthy" ~ "#b687ba",
       grid$category == "Hazardous" ~ "#590e63"
     )
-  } else if (pollutant == "O3" || pollutant == "o3") {
+  } else if (pollutant == "O3") {
     # O3 (ppm), 1-hour
-
-    print(c("The entered pollutant is:", pollutant))
 
     grid$category <- dplyr::case_when(
       grid$value > 0.125 & grid$value <= 0.164 ~
@@ -175,6 +197,12 @@ map_colors <- function(grid, pollutant) {
       grid$value > 0.404 ~ "Hazardous"
     )
 
+    if (any(is.na(grid$category))) {
+      warning(
+        "Some O3 values are below the minimum AQI breakpoint and were assigned NA."
+      )
+    }
+
     grid$color <- dplyr::case_when(
       grid$category == "Good" ~ "#abdda4",
       grid$category == "Moderate" ~ "#f8fd66",
@@ -183,8 +211,6 @@ map_colors <- function(grid, pollutant) {
       grid$category == "Very unhealthy" ~ "#b687ba",
       grid$category == "Hazardous" ~ "#590e63"
     )
-  } else {
-    stop("The exposure to this pollutant cannot be modeled.")
   }
 
   return(grid)
