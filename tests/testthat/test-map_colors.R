@@ -141,3 +141,81 @@ test_that("pollutant names are case sensitive", {
     "must be one of"
   )
 })
+
+test_that("CO categories are assigned correctly", {
+  grid <- sf::st_as_sf(
+    data.frame(
+      value = c(2, 6, 10, 14, 20, 35),
+      lon = 1:6,
+      lat = 1:6
+    ),
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+  result <- map_colors(grid, "CO")
+
+  expect_equal(
+    result$category,
+    c(
+      "Good",
+      "Moderate",
+      "Unhealthy for sensible groups",
+      "Unhealthy",
+      "Very unhealthy",
+      "Hazardous"
+    )
+  )
+})
+
+test_that("SO2 categories are assigned correctly", {
+  grid <- sf::st_as_sf(
+    data.frame(
+      value = c(20, 50, 100, 250, 500, 700),
+      lon = 1:6,
+      lat = 1:6
+    ),
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+  result <- map_colors(grid, "SO2")
+
+  expect_equal(
+    result$category,
+    c(
+      "Good",
+      "Moderate",
+      "Unhealthy for sensible groups",
+      "Unhealthy",
+      "Very unhealthy",
+      "Hazardous"
+    )
+  )
+})
+
+test_that("NO2 categories are assigned correctly", {
+  grid <- sf::st_as_sf(
+    data.frame(
+      value = c(20, 80, 200, 500, 1000, 1300),
+      lon = 1:6,
+      lat = 1:6
+    ),
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+  result <- map_colors(grid, "NO2")
+
+  expect_equal(
+    result$category,
+    c(
+      "Good",
+      "Moderate",
+      "Unhealthy for sensible groups",
+      "Unhealthy",
+      "Very unhealthy",
+      "Hazardous"
+    )
+  )
+})

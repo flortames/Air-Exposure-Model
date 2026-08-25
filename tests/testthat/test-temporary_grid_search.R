@@ -175,3 +175,77 @@ test_that("averages pollutant values across multiple hours", {
   expect_equal(result$ID, 1)
   expect_equal(result$value, 15)
 })
+
+test_that("fails when gridID column is not found", {
+  temp_folder <- tempfile()
+  dir.create(temp_folder)
+
+  grid <- sf::st_as_sf(
+    data.frame(
+      wrong_ID = 1,
+      value = 100,
+      lon = -64,
+      lat = -31
+    ),
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+  sf::st_write(
+    grid,
+    file.path(
+      temp_folder,
+      "2019-08-01_0800.shp"
+    ),
+    delete_layer = TRUE,
+    quiet = TRUE
+  )
+
+  expect_error(
+    temporary_grid_search(
+      start_hour = "2019-08-01 08:00:00",
+      dir = temp_folder,
+      time_format = "%Y-%m-%d %H:%M:%S",
+      gridID = "ID",
+      shapeValue = "value"
+    ),
+    "gridID"
+  )
+})
+
+test_that("fails when shapeValue column is not found", {
+  temp_folder <- tempfile()
+  dir.create(temp_folder)
+
+  grid <- sf::st_as_sf(
+    data.frame(
+      ID = 1,
+      wrongval = 100,
+      lon = -64,
+      lat = -31
+    ),
+    coords = c("lon", "lat"),
+    crs = 4326
+  )
+
+  sf::st_write(
+    grid,
+    file.path(
+      temp_folder,
+      "2019-08-01_0800.shp"
+    ),
+    delete_layer = TRUE,
+    quiet = TRUE
+  )
+
+  expect_error(
+    temporary_grid_search(
+      start_hour = "2019-08-01 08:00:00",
+      dir = temp_folder,
+      time_format = "%Y-%m-%d %H:%M:%S",
+      gridID = "ID",
+      shapeValue = "value"
+    ),
+    "shapeValue"
+  )
+})
