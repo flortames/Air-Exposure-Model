@@ -66,16 +66,58 @@ trajectories_tomtom <- function(
     stop("'origin' and 'dest' must be provided.")
   }
 
-  if (missing(key) || key == "") {
+  if (!is.character(origin) || length(origin) != 1) {
+    stop("'origin' must be a character string.")
+  }
+
+  if (!is.character(dest) || length(dest) != 1) {
+    stop("'dest' must be a character string.")
+  }
+
+  if (
+    missing(key) ||
+      !is.character(key) ||
+      length(key) != 1 ||
+      is.na(key) ||
+      key == ""
+  ) {
     stop("A valid TomTom API key must be provided.")
   }
 
-  if (length(strsplit(origin, ",")[[1]]) != 2) {
+  coordinate_pattern <- "^-?[0-9]+(?:\\.[0-9]+)?,-?[0-9]+(?:\\.[0-9]+)?$"
+
+  if (!grepl(coordinate_pattern, origin)) {
     stop("'origin' must be in the format 'latitude,longitude'.")
   }
 
-  if (length(strsplit(dest, ",")[[1]]) != 2) {
+  if (!grepl(coordinate_pattern, dest)) {
     stop("'dest' must be in the format 'latitude,longitude'.")
+  }
+
+  valid_modes <- c(
+    "car",
+    "truck",
+    "pedestrian",
+    "bicycle"
+  )
+
+  if (
+    !is.character(mode) ||
+      length(mode) != 1 ||
+      is.na(mode) ||
+      !mode %in% valid_modes
+  ) {
+    stop(
+      "'mode' must be one of: car, truck, pedestrian, bicycle."
+    )
+  }
+
+  if (
+    !is.character(hour_trajectory) ||
+      length(hour_trajectory) != 1 ||
+      is.na(hour_trajectory)
+  ) {
+    stop("'hour_trajectory' must be a character string.")
   }
 
   num_alternative <- 5
