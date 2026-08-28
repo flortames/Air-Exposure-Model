@@ -98,7 +98,8 @@ trajectories_tomtom <- function(
     "car",
     "truck",
     "pedestrian",
-    "bicycle"
+    "bicycle",
+    "motorcycle"
   )
 
   if (
@@ -108,7 +109,7 @@ trajectories_tomtom <- function(
       !mode %in% valid_modes
   ) {
     stop(
-      "'mode' must be one of: car, truck, pedestrian, bicycle."
+      "'mode' must be one of: car, truck, pedestrian, bicycle, motorcycle."
     )
   }
 
