@@ -110,3 +110,59 @@ test_that("hour_trajectory must have the expected format", {
     "could not be parsed"
   )
 })
+
+test_that("processes a mocked TomTom response", {
+  webmockr::enable()
+  on.exit(webmockr::disable(), add = TRUE)
+  on.exit(webmockr::webmockr_reset(), add = TRUE)
+  
+  fixture_path <- testthat::test_path(
+    "fixtures",
+    "tomtom-route.json"
+  )
+  
+  response_body <- paste(
+    readLines(fixture_path, warn = FALSE),
+    collapse = "\n"
+  )
+  
+  stub <- webmockr::stub_request(
+    method = "get",
+    uri_regex = "api\\.tomtom\\.com/routing/1/calculateRoute/"
+  )
+  
+  webmockr::to_return(
+    stub,
+    status = 200,
+    body = response_body,
+    headers = list(
+      "Content-Type" = "application/json"
+    )
+  )
+  
+  result <- trajectories_tomtom(
+    origin = "-31.4201,-64.1888",
+    dest = "-31.4300,-64.2000",
+    mode = "car",
+    hour_trajectory = "2019-08-01 08:00:00",
+    key = "fake-key"
+  )
+  
+  expect_s3_class(result, "data.frame")
+  expect_true(nrow(result) > 0)
+  
+  expect_true(
+    all(
+      c(
+        "ID",
+        "long",
+        "lat",
+        "departureTime",
+        "arrivalTime",
+        "lengthInKM",
+        "travelTimeInMinutes",
+        "alternative"
+      ) %in% names(result)
+    )
+  )
+})

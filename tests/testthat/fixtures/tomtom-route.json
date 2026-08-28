@@ -1,0 +1,36 @@
+{
+  "routes": [
+    {
+      "legs": [
+        {
+          "points": [
+            {
+              "longitude": -64.1888,
+              "latitude": -31.4201
+            },
+            {
+              "longitude": -64.2000,
+              "latitude": -31.4300
+            }
+          ],
+          "summary": {
+            "departureTime": "2019-08-01T08:00:00",
+            "arrivalTime": "2019-08-01T08:15:00",
+            "lengthInMeters": 10000,
+            "trafficLengthInMeters": 8000,
+            "trafficDelayInSeconds": 120,
+            "travelTimeInSeconds": 900,
+            "liveTrafficIncidentsTravelTimeInSeconds": 1020,
+            "historicTrafficTravelTimeInSeconds": 960,
+            "noTrafficTravelTimeInSeconds": 780
+          }
+        }
+      ],
+      "sections": [
+        {
+          "travelMode": "car"
+        }
+      ]
+    }
+  ]
+}
