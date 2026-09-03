@@ -175,7 +175,7 @@ test_that("returns a leaflet map when output is plot", {
     },
     .package = "AirExposure"
   )
-  
+
   result <- alternative_trajectories(
     origin = "-31.4201,-64.1888",
     dest = "-31.4300,-64.2000",
@@ -189,6 +189,6 @@ test_that("returns a leaflet map when output is plot", {
     units = "ug/m3",
     pollutant = "PM2.5"
   )
-  
+
   expect_s3_class(result, "leaflet")
 })
