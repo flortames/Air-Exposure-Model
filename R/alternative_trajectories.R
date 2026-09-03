@@ -63,6 +63,8 @@
 #' )
 #' }
 #'
+#' @importFrom rlang .data
+#'
 #' @export
 
 alternative_trajectories <- function(
@@ -78,6 +80,10 @@ alternative_trajectories <- function(
   units,
   pollutant
 ) {
+  if (!output %in% c("df", "plot")) {
+    stop("'output' must be either 'df' or 'plot'.")
+  }
+
   # Retrieve alternative routes from the TomTom Routing API
 
   trajectory <- trajectories_tomtom(
@@ -102,94 +108,94 @@ alternative_trajectories <- function(
 
   trajectory |>
     dplyr::group_by(alternative) |>
-    dplyr::group_split() -> dat_agrupado
+    dplyr::group_split() -> grouped_routes
 
   for (x in seq_len(nrow(v_lines))) {
-    departureTime <- dat_agrupado[[x]][["departureTime"]][1]
+    departureTime <- grouped_routes[[x]][["departureTime"]][1]
 
-    arrivalTime <- dat_agrupado[[x]][["arrivalTime"]][1]
+    arrivalTime <- grouped_routes[[x]][["arrivalTime"]][1]
 
-    lengthInKM <- dat_agrupado[[x]][["lengthInKM"]][1]
+    lengthInKM <- grouped_routes[[x]][["lengthInKM"]][1]
 
-    trafficLengthInKM <- dat_agrupado[[x]][["trafficLengthInKM"]][1]
+    trafficLengthInKM <- grouped_routes[[x]][["trafficLengthInKM"]][1]
 
-    travelMode <- dat_agrupado[[x]][["travelMode"]][1]
+    travelMode <- grouped_routes[[x]][["travelMode"]][1]
 
     trafficDelayInMinutes <-
-      dat_agrupado[[x]][["trafficDelayInMinutes"]][1]
+      grouped_routes[[x]][["trafficDelayInMinutes"]][1]
 
     travelTimeInMinutes <-
-      dat_agrupado[[x]][["travelTimeInMinutes"]][1]
+      grouped_routes[[x]][["travelTimeInMinutes"]][1]
 
     liveTrafficIncidentsTravelTimeInMinutes <-
-      dat_agrupado[[x]][[
+      grouped_routes[[x]][[
         "liveTrafficIncidentsTravelTimeInMinutes"
       ]][1]
 
     historicTrafficTravelTimeInMinutes <-
-      dat_agrupado[[x]][[
+      grouped_routes[[x]][[
         "historicTrafficTravelTimeInMinutes"
       ]][1]
 
     noTrafficTravelTimeInMinutes <-
-      dat_agrupado[[x]][[
+      grouped_routes[[x]][[
         "noTrafficTravelTimeInMinutes"
       ]][1]
 
-    alternative <- dat_agrupado[[x]][["alternative"]][1]
+    alternative <- grouped_routes[[x]][["alternative"]][1]
+
+    route_data <- data.frame(
+      alternative = alternative,
+      departureTime = departureTime,
+      arrivalTime = arrivalTime,
+      lengthInKM = lengthInKM,
+      trafficLengthInKM = trafficLengthInKM,
+      travelMode = travelMode,
+      trafficDelayInMinutes = trafficDelayInMinutes,
+      travelTimeInMinutes = travelTimeInMinutes,
+      liveTrafficIncidentsTravelTimeInMinutes = liveTrafficIncidentsTravelTimeInMinutes,
+      historicTrafficTravelTimeInMinutes = historicTrafficTravelTimeInMinutes,
+      noTrafficTravelTimeInMinutes = noTrafficTravelTimeInMinutes
+    )
+
+    id_df <- rbind(
+      id_df,
+      route_data
+    )
   }
 
   df2 <- dplyr::left_join(v_lines, id_df, by = "alternative")
 
   # Retrieve the pollutant grid corresponding to the travel period
 
-  sf::st_write(
-    obj = df2,
-    dsn = "./temp",
-    layer = "temp",
-    driver = "ESRI Shapefile",
-    quiet = TRUE
-  )
-
-  df3 <- sf::st_read(
-    dsn = "temp/temp.shp",
-    quiet = TRUE
-  )
+  df3 <- df2
 
   # Search the pollutant grid corresponding to the selected time
 
   grid <- temporary_grid_search(
-    start_hour = df3$dprtrTm[1],
-    end_hour = df3$arrvlTm[length(df3$arrvlTm)],
+    start_hour = df3$departureTime[1],
+    end_hour = df3$arrivalTime[length(df3$arrivalTime)],
     dir = dir,
     time_format = "%Y-%m-%dT%H:%M:%S",
     gridID = gridID,
     shapeValue = shapeValue
   )
 
-  intersection_grid <- sf::st_intersection(df3, grid)
-
-  # Delete temporary files
-
-  file.remove(
-    file.path(
-      "./temp",
-      dir(path = "./temp", pattern = "temp.*")
+  intersection_grid <- suppressWarnings(
+    sf::st_intersection(
+      df3,
+      grid
     )
   )
 
   dataSplit_intersection <- intersection_grid |>
-    dplyr::group_by(altrntv) |>
+    dplyr::group_by(.data$alternative) |>
     dplyr::group_split()
 
   sum_df <- data.frame()
 
   for (i in seq_along(dataSplit_intersection)) {
-    origin <- dataSplit_intersection[[i]][["origin"]][1]
-
-    destination <- dataSplit_intersection[[i]][["destination"]][1]
-
-    alternative <- dataSplit_intersection[[i]][["altrntv"]][1]
+    alternative <- dataSplit_intersection[[i]][["alternative"]][1]
 
     daily_pol_value_mean <- round(
       mean(
@@ -641,7 +647,14 @@ alternative_trajectories <- function(
       leaflet::addLegend(
         position = "bottomright",
         colors = palette_grid,
-        labels = levels(grid$category),
+        labels = c(
+          "Good",
+          "Moderate",
+          "Unhealthy for sensible groups",
+          "Unhealthy",
+          "Very unhealthy",
+          "Hazardous"
+        ),
         title = pollutant,
         opacity = 1
       ) |>
