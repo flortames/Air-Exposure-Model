@@ -142,13 +142,14 @@ total_exposure <- function(
         origin = origin_coords,
         dest = destination_coords,
         mode = mode[i],
-        dir,
+        dir = dir,
         key = key,
         output = "df",
         hours = departure_time_home,
-        gridID,
-        shapeValue,
-        units
+        gridID = gridID,
+        shapeValue = shapeValue,
+        units = units,
+        pollutant = pollutant
       )
     } else if (i == length(travel_list$long)) {
       # Last trip: return to the first location (home)
@@ -169,13 +170,14 @@ total_exposure <- function(
         origin = origin_coords,
         dest = origin_coords_1,
         mode = mode[i],
-        dir,
+        dir = dir,
         key = key,
         output = "df",
         hours = prox_hour_output,
-        gridID,
-        shapeValue,
-        units
+        gridID = gridID,
+        shapeValue = shapeValue,
+        units = units,
+        pollutant = pollutant
       )
     } else {
       # Intermediate trips
@@ -196,13 +198,14 @@ total_exposure <- function(
         origin = origin_coords,
         dest = destination_coords,
         mode = mode[i],
-        dir,
+        dir = dir,
         key = key,
         output = "df",
         hours = prox_hour_output,
-        gridID,
-        shapeValue,
-        units
+        gridID = gridID,
+        shapeValue = shapeValue,
+        units = units,
+        pollutant = pollutant
       )
     }
 
@@ -241,13 +244,13 @@ total_exposure <- function(
           format = "%Y-%m-%dT%H:%M:%S"
         )
       ) +
-        minutes(activity_minutes[i, ])
+        lubridate::minutes(activity_minutes[i, ])
 
       destination_time <- as.numeric(
         difftime(
           prox_hour_output,
           arrival_time,
-          unit = "mins"
+          units = "mins"
         )
       )
     } else if (i == nrow(activity_minutes) + 1) {
@@ -275,7 +278,7 @@ total_exposure <- function(
         difftime(
           prox_hour_output,
           arrival_time,
-          unit = "mins"
+          units = "mins"
         )
       )
     } else {
@@ -287,7 +290,7 @@ total_exposure <- function(
           format = "%Y-%m-%dT%H:%M:%S"
         )
       ) +
-        minutes(activity_minutes[i, ])
+        lubridate::minutes(activity_minutes[i, ])
 
       arrival_time <- as.POSIXct(
         strptime(
@@ -300,7 +303,7 @@ total_exposure <- function(
         difftime(
           prox_hour_output,
           arrival_time,
-          unit = "mins"
+          units = "mins"
         )
       )
     }
@@ -308,7 +311,6 @@ total_exposure <- function(
     # Trip information
 
     trip_time <- selection_route$travelTimeInMinutes[1] # minutes
-    trip_distance <- selection_route$lengthInMeters[1]
 
     trip_conc <- mean(
       selection_route$daily_pol_value_mean,
@@ -331,23 +333,13 @@ total_exposure <- function(
       data_destination
     )
 
-    df_concentractions <- st_as_sf(
+    df_concentractions <- sf::st_as_sf(
       df_concentractions,
       coords = c("long", "lat"),
       crs = 4326
     )
 
-    dir_point <- paste(dir, "/temp/", sep = "")
-    name_point <- paste(dir_point, "temp_point.shp", sep = "")
-
-    st_write(
-      df_concentractions,
-      paste(dir_point, "temp_point.shp", sep = ""),
-      driver = "ESRI Shapefile",
-      quiet = TRUE
-    )
-
-    point <- st_read(name_point, quiet = TRUE)
+    point <- df_concentractions
 
     # Retrieve the pollutant grid for the selected time interval
 
@@ -360,28 +352,11 @@ total_exposure <- function(
       shapeValue
     )
 
-    intersection_point <- sf::st_intersection(point, grid)
+    names(grid)[names(grid) == "ID"] <- "gridID"
+    names(grid)[names(grid) == "value"] <- "grid_value"
 
-    names(intersection_point) <- c(
-      "altrntv",
-      "ID",
-      "dprtrTm",
-      "arrvlTm",
-      "lngthIM",
-      "trffLIM",
-      "travlMd",
-      "trffDIS",
-      "trvlTIS",
-      "lTITTIS",
-      "hsTTTIS",
-      "nTrTTIS",
-      "value",
-      "exposur",
-      "type",
-      "i",
-      "gridID",
-      "value.1",
-      "geometry"
+    intersection_point <- suppressWarnings(
+      sf::st_intersection(point, grid)
     )
 
     conc_destination <- which(
@@ -389,7 +364,7 @@ total_exposure <- function(
     )
 
     conc_destination <- intersection_point[conc_destination, ]
-    conc_destination <- conc_destination$value.1
+    conc_destination <- conc_destination$grid_value
 
     if (i == 1) {
       # Origin concentrations
@@ -412,31 +387,14 @@ total_exposure <- function(
         shapeValue
       )
 
-      intersection_point <- sf::st_intersection(
-        point,
-        grid_origin
-      )
+      names(grid_origin)[names(grid_origin) == "ID"] <- "gridID"
+      names(grid_origin)[names(grid_origin) == "value"] <- "grid_value"
 
-      names(intersection_point) <- c(
-        "altrntv",
-        "ID",
-        "dprtrTm",
-        "arrvlTm",
-        "lngthIM",
-        "trffLIM",
-        "travlMd",
-        "trffDIS",
-        "trvlTIS",
-        "lTITTIS",
-        "hsTTTIS",
-        "nTrTTIS",
-        "value",
-        "exposur",
-        "type",
-        "i",
-        "gridID",
-        "value.1",
-        "geometry"
+      intersection_point <- suppressWarnings(
+        sf::st_intersection(
+          point,
+          grid_origin
+        )
       )
 
       conc_origin <- which(
@@ -444,28 +402,19 @@ total_exposure <- function(
       )
 
       conc_origin <- intersection_point[conc_origin, ]
-      conc_origin <- conc_origin$value.1
+      conc_origin <- conc_origin$grid_value
 
       time_origin <- as.numeric(
         difftime(
           departure_time_home,
           start_time,
-          unit = "mins"
+          units = "mins"
         )
       )
     } else {
       conc_origin <- NA
       time_origin <- NA
     }
-
-    point <- sf::st_read(name_point, quiet = TRUE)
-
-    file.remove(
-      file.path(
-        dir_point,
-        dir(path = dir_point, pattern = "temp_point.*")
-      )
-    )
 
     df_1 <- data.frame(
       lat_origin,
@@ -596,7 +545,7 @@ total_exposure <- function(
   # HTML map style
 
   tag.map.title <- htmltools::tags$style(
-    HTML(
+    htmltools::HTML(
       "
   .leaflet-control.map-title {
     transform: translate(-50%,20%);
@@ -617,7 +566,7 @@ total_exposure <- function(
 
   title <- htmltools::tags$div(
     tag.map.title,
-    HTML(
+    htmltools::HTML(
       paste(
         sep = "<br/>",
         paste0("<center><b>Total daily exposure estimate</b></center>"),
@@ -643,8 +592,8 @@ total_exposure <- function(
     )
   )
 
-  init_day <- paste(date(input_hour), "00:00:01", sep = " ")
-  finish_day <- paste(date(input_hour), "23:59:01", sep = " ")
+  init_day <- paste(as.Date(input_hour), "00:00:01", sep = " ")
+  finish_day <- paste(as.Date(input_hour), "23:59:01", sep = " ")
 
   grid_tot <- temporary_grid_search(
     start_hour = init_day,
@@ -742,32 +691,14 @@ total_exposure <- function(
     )
 
   if (output_exp == "df") {
-    file.remove(
-      file.path(
-        dir_point,
-        dir(path = dir_point, pattern = "temp.*")
-      )
-    )
     return(rbind_df_1)
   }
 
   if (output_exp == "plot") {
-    file.remove(
-      file.path(
-        dir_point,
-        dir(path = dir_point, pattern = "temp.*")
-      )
-    )
     return(mapa)
   }
 
   if (output_exp == "polyline") {
-    file.remove(
-      file.path(
-        dir_point,
-        dir(path = dir_point, pattern = "temp.*")
-      )
-    )
     return(route_line)
   }
 }
