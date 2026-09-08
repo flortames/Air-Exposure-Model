@@ -50,6 +50,26 @@ make_grid <- function(
   date,
   values = NULL
 ) {
+  if (
+    !is.numeric(pixelSize) ||
+      length(pixelSize) != 1 ||
+      pixelSize <= 0
+  ) {
+    stop("'pixelSize' must be a positive numeric value.")
+  }
+
+  if (xmin >= xmax) {
+    stop("'xmin' must be smaller than 'xmax'.")
+  }
+
+  if (ymin >= ymax) {
+    stop("'ymin' must be smaller than 'ymax'.")
+  }
+
+  if (!dir.exists(Dir)) {
+    stop("Directory specified in 'Dir' does not exist.")
+  }
+
   # Convert the grid resolution from meters to degrees
 
   latitude <- (ymin + ymax) / 2
@@ -90,8 +110,6 @@ make_grid <- function(
   ID <- seq_along(grid)
 
   for (i in 0:23) {
-    print(i)
-
     random_values <- sample(
       0:500,
       length(grid),
@@ -122,7 +140,7 @@ make_grid <- function(
 
     sf::st_write(
       sfc_polygon_values,
-      paste(Dir, name, sep = "")
+      file.path(Dir, name)
     )
   }
 }

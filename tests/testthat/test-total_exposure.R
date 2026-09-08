@@ -216,3 +216,121 @@ test_that("returns a dataframe when output_exp is df", {
     )
   )
 })
+
+test_that("handles intermediate trips", {
+  testthat::local_mocked_bindings(
+    alternative_trajectories = function(...) {
+      fake_alternative_routes
+    },
+    temporary_grid_search = function(...) {
+      fake_exposure_grid
+    },
+    .package = "AirExposure"
+  )
+
+  travel_list <- data.frame(
+    long = c(-64.18, -64.19, -64.20),
+    lat = c(-31.42, -31.425, -31.43)
+  )
+
+  result <- total_exposure(
+    travel_list = travel_list,
+    mode = c("car", "car", "car"),
+    dir = tempdir(),
+    key = "fake",
+    selection = c("fast", "fast", "fast"),
+    output_exp = "df",
+    departure_time_home = "2019-08-01 08:00:00",
+    activity_minutes = data.frame(
+      minutes = c(60, 90)
+    ),
+    pollutant = "PM2.5",
+    shapeValue = "value",
+    gridID = "ID",
+    units = "ug/m3"
+  )
+
+  expect_s3_class(result, "data.frame")
+  expect_equal(nrow(result), 3)
+  expect_equal(result$i, 1:3)
+})
+
+test_that("returns a leaflet map when output_exp is plot", {
+  testthat::local_mocked_bindings(
+    alternative_trajectories = function(...) {
+      fake_alternative_routes
+    },
+    temporary_grid_search = function(...) {
+      fake_exposure_grid
+    },
+    .package = "AirExposure"
+  )
+
+  travel_list <- data.frame(
+    long = c(-64.18, -64.20),
+    lat = c(-31.42, -31.43)
+  )
+
+  result <- total_exposure(
+    travel_list = travel_list,
+    mode = c("car", "car"),
+    dir = tempdir(),
+    key = "fake",
+    selection = c("fast", "fast"),
+    output_exp = "plot",
+    departure_time_home = "2019-08-01 08:00:00",
+    activity_minutes = data.frame(
+      minutes = 60
+    ),
+    pollutant = "PM2.5",
+    shapeValue = "value",
+    gridID = "ID",
+    units = "ug/m3"
+  )
+
+  expect_s3_class(result, "leaflet")
+})
+
+test_that("returns route geometry when output_exp is polyline", {
+  testthat::local_mocked_bindings(
+    alternative_trajectories = function(...) {
+      fake_alternative_routes
+    },
+
+    temporary_grid_search = function(...) {
+      fake_exposure_grid
+    },
+
+    .package = "AirExposure"
+  )
+
+  travel_list <- data.frame(
+    long = c(-64.18, -64.20),
+    lat = c(-31.42, -31.43)
+  )
+
+  result <- total_exposure(
+    travel_list = travel_list,
+    mode = c("car", "car"),
+    dir = tempdir(),
+    key = "fake",
+    selection = c("fast", "fast"),
+    output_exp = "polyline",
+    departure_time_home = "2019-08-01 08:00:00",
+    activity_minutes = data.frame(
+      minutes = 60
+    ),
+    pollutant = "PM2.5",
+    shapeValue = "value",
+    gridID = "ID",
+    units = "ug/m3"
+  )
+
+  expect_s3_class(result, "sf")
+
+  expect_true(
+    all(
+      sf::st_geometry_type(result) == "LINESTRING"
+    )
+  )
+})

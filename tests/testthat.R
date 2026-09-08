@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(Air-Exposure-Model)
+library(AirExposure)
 
-test_check("Air-Exposure-Model")
+test_check("AirExposure")
