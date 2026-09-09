@@ -9,7 +9,7 @@
 #' @param xmin Numeric. Minimum longitude of the grid extent.
 #' @param xmax Numeric. Maximum longitude of the grid extent.
 #' @param pixelSize Numeric. Grid cell size in meters.
-#' @param Dir Character. Directory where the shapefiles will be written.
+#' @param dir Character. Directory where the shapefiles will be written.
 #' @param date Character. Date used in the output filenames
 #'   (`"YYYY-mm-dd"`).
 #' @param values Optional. Currently unused.
@@ -31,7 +31,7 @@
 #'   xmin = -64.3,
 #'   xmax = -64.0,
 #'   pixelSize = 1000,
-#'   Dir = "example_grids/",
+#'   dir = "example_grids/",
 #'   date = "2019-08-01"
 #' )
 #' }
@@ -46,7 +46,7 @@ make_grid <- function(
   xmin,
   xmax,
   pixelSize,
-  Dir,
+  dir,
   date,
   values = NULL
 ) {
@@ -66,8 +66,8 @@ make_grid <- function(
     stop("'ymin' must be smaller than 'ymax'.")
   }
 
-  if (!dir.exists(Dir)) {
-    stop("Directory specified in 'Dir' does not exist.")
+  if (!dir.exists(dir)) {
+    stop("Directory specified in 'dir' does not exist.")
   }
 
   # Convert the grid resolution from meters to degrees
@@ -140,7 +140,7 @@ make_grid <- function(
 
     sf::st_write(
       sfc_polygon_values,
-      file.path(Dir, name)
+      file.path(dir, name)
     )
   }
 }

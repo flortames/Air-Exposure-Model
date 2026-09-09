@@ -13,10 +13,11 @@
 #'   format `"latitude,longitude"`.
 #' @param dest Character string containing the destination coordinates in the
 #'   format `"latitude,longitude"`.
-#' @param mode Character. Travel mode accepted by the TomTom Routing API
-#'   (e.g., `"car"`, `"truck"`, `"pedestrian"`).
+#' @param mode Character. Travel mode accepted by the TomTom Routing API.
+#'   Supported values are `"car"`, `"truck"`, `"pedestrian"`, `"bicycle"`
+#'   and `"motorcycle"`.
 #' @param hours Character. Departure date and time in the format
-#'   "YYYY-mm-dd HH:MM:SS".
+#'   `"YYYY-mm-dd HH:MM:SS"`.
 #' @param key Character. TomTom API key.
 #' @param dir Character. Directory containing the hourly pollutant grid
 #'   shapefiles.
@@ -419,7 +420,7 @@ alternative_trajectories <- function(
       ),
       paste0(
         "<b>Concentrations: </b>",
-        more_polluted_route$value,
+        more_polluted_route$daily_pol_value_mean,
         " ",
         units
       ),

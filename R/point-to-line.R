@@ -22,6 +22,9 @@
 #'
 #' @examples
 #' \dontrun{
+#' # trajectory must contain point coordinates
+#' # and an identifier for each route
+#'
 #' line <- points_to_line(
 #'   data = trajectory,
 #'   long = "long",

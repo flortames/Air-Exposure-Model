@@ -24,6 +24,9 @@
 #'
 #' @examples
 #' \dontrun{
+#' # grid must be an sf object containing
+#' # a pollutant concentration column named "value"
+#'
 #' colored_grid <- map_colors(
 #'   grid = pollutant_grid,
 #'   pollutant = "PM2.5"

@@ -9,16 +9,20 @@
 #'   format `"latitude,longitude"`.
 #' @param dest Character string containing the destination coordinates in the
 #'   format `"latitude,longitude"`.
-#' @param mode Character. Travel mode accepted by the TomTom Routing API
-#'   (e.g., `"car"`, `"truck"`, `"pedestrian"`, `"bicycle"`).
+#' @param mode Character. Travel mode accepted by the TomTom Routing API.
+#'   Supported values are `"car"`, `"truck"`, `"pedestrian"`, `"bicycle"`
+#'   and `"motorcycle"`.
 #' @param hour_trajectory Character. Departure date and time in the format
 #'   `"YYYY-mm-dd HH:MM:SS"`.
 #' @param key Character. Valid TomTom Routing API key.
 #'
 #' @details
-#' This function requires a valid TomTom Routing API key and an active
-#' internet connection. The output includes one row for each point along
-#' each alternative route returned by the API.
+#' This function requires a valid TomTom API key and an active internet
+#' connection. Origin and destination coordinates must be supplied as
+#' latitude-longitude pairs using the EPSG:4326 coordinate reference system.
+#'
+#' The output includes one row for each point along each alternative route
+#' returned by the API.
 #'
 #' @return
 #' A data frame with one row per route point and the following variables:

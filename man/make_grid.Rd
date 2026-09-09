@@ -4,7 +4,7 @@
 \alias{make_grid}
 \title{Create example hourly pollutant grids}
 \usage{
-make_grid(ymin, ymax, xmin, xmax, pixelSize, Dir, date, values = NULL)
+make_grid(ymin, ymax, xmin, xmax, pixelSize, dir, date, values = NULL)
 }
 \arguments{
 \item{ymin}{Numeric. Minimum latitude of the grid extent.}
@@ -17,7 +17,7 @@ make_grid(ymin, ymax, xmin, xmax, pixelSize, Dir, date, values = NULL)
 
 \item{pixelSize}{Numeric. Grid cell size in meters.}
 
-\item{Dir}{Character. Directory where the shapefiles will be written.}
+\item{dir}{Character. Directory where the shapefiles will be written.}
 
 \item{date}{Character. Date used in the output filenames
 (\code{"YYYY-mm-dd"}).}
@@ -46,7 +46,7 @@ make_grid(
   xmin = -64.3,
   xmax = -64.0,
   pixelSize = 1000,
-  Dir = "example_grids/",
+  dir = "example_grids/",
   date = "2019-08-01"
 )
 }

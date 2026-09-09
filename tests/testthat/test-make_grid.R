@@ -6,7 +6,7 @@ test_that("pixelSize must be positive", {
       xmin = -64.3,
       xmax = -64.0,
       pixelSize = 0,
-      Dir = tempdir(),
+      dir = tempdir(),
       date = "2019-08-01"
     ),
     "pixelSize"
@@ -21,7 +21,7 @@ test_that("xmin must be smaller than xmax", {
       xmin = -64.0,
       xmax = -64.3,
       pixelSize = 1000,
-      Dir = tempdir(),
+      dir = tempdir(),
       date = "2019-08-01"
     ),
     "xmin"
@@ -36,7 +36,7 @@ test_that("ymin must be smaller than ymax", {
       xmin = -64.3,
       xmax = -64.0,
       pixelSize = 1000,
-      Dir = tempdir(),
+      dir = tempdir(),
       date = "2019-08-01"
     ),
     "ymin"
@@ -53,7 +53,7 @@ test_that("creates 24 hourly shapefiles", {
     xmin = -64.3,
     xmax = -64.0,
     pixelSize = 1000,
-    Dir = out_dir,
+    dir = out_dir,
     date = "2019-08-01"
   )
 
@@ -75,7 +75,7 @@ test_that("generated grids contain ID and value fields", {
     xmin = -64.3,
     xmax = -64.0,
     pixelSize = 1000,
-    Dir = out_dir,
+    dir = out_dir,
     date = "2019-08-01"
   )
 

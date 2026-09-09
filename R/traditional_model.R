@@ -38,10 +38,6 @@
 #'
 #' @export
 
-# Traditional exposure model
-# Estimate exposure assuming that the individual remains at the origin
-# location throughout the entire day.
-
 traditional_model <- function(
   origin_point,
   date,

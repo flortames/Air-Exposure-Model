@@ -6,22 +6,24 @@
 #' while pollutant concentrations are extracted from hourly grid shapefiles.
 #'
 #' @param travel_list Data frame containing the sequence of locations visited
-#'   during the day. It must contain `latitude` and `longitude` columns. The
-#'   first location is assumed to be the home location and the final trip always
-#'   returns to this point.
-#' @param mode Character vector indicating the travel mode for each trip (for
-#'   example `"car"`, `"pedestrian"` or `"bicycle"`).
-#' @param dir Character. Working directory containing the pollutant grids and
-#'   temporary files.
+#'   during the day. It must contain the columns `long` and `lat`. The first
+#'   location is assumed to be the home location, and the final trip returns
+#'   to this location.
+#' @param mode Character vector indicating the travel mode for each trip.
+#'   Supported values are `"car"`, `"truck"`, `"pedestrian"`, `"bicycle"`
+#'   and `"motorcycle"`.
+#' @param dir Character. Directory containing the hourly pollutant grid
+#'   shapefiles.
 #' @param key Character. TomTom API key.
-#' @param selection Integer or character vector indicating which alternative
-#'   route is selected for each trip.
+#' @param selection Character vector indicating the route criterion selected
+#'   for each trip. Supported values are `"fast"`, `"short"`, `"lesspol"`,
+#'   `"morepol"`, `"lessexpos"` and `"moreexpos"`.
 #' @param output_exp Character. Output type. One of `"df"`, `"plot"` or
 #'   `"polyline"`.
 #' @param departure_time_home Character. Departure date and time from the home
 #'   location.
-#' @param activity_minutes Numeric vector indicating the duration (minutes) of
-#'   the activity performed at each destination.
+#' @param activity_minutes A one-column data frame or matrix containing the
+#'   duration, in minutes, of the activity performed at each destination.
 #' @param pollutant Character. Pollutant name used for map classification (for
 #'   example `"PM2.5"`).
 #' @param shapeValue Character. Name of the pollutant concentration field in the
@@ -59,22 +61,30 @@
 #'
 #' @examples
 #' \dontrun{
+#' travel_list <- data.frame(
+#'   long = c(-68.8620, -68.8348),
+#'   lat = c(-32.8956, -32.8875)
+#' )
+#'
+#' activity_minutes <- data.frame(
+#'   minutes = 480
+#' )
+#'
 #' exposure <- total_exposure(
 #'   travel_list = travel_list,
-#'   mode = c("car", "pedestrian"),
-#'   dir = data_dir,
-#'   key = api_key,
-#'   selection = c(1, 1),
+#'   mode = c("car", "car"),
+#'   dir = "path/to/grids",
+#'   key = "YOUR_API_KEY",
+#'   selection = c("fast", "fast"),
 #'   output_exp = "plot",
 #'   departure_time_home = "2019-08-01 08:00:00",
-#'   activity_minutes = c(480),
+#'   activity_minutes = activity_minutes,
 #'   pollutant = "PM2.5",
 #'   shapeValue = "value",
 #'   gridID = "ID",
-#'   units = expression(mu * g/m^3)
+#'   units = "ug/m3"
 #' )
 #' }
-#'
 #' @export
 
 total_exposure <- function(
@@ -97,6 +107,12 @@ total_exposure <- function(
     stop("'travel_list' must be a data.frame.")
   }
 
+  required_columns <- c("long", "lat")
+
+  if (!all(required_columns %in% names(travel_list))) {
+    stop("'travel_list' must contain the columns 'long' and 'lat'.")
+  }
+
   if (nrow(travel_list) < 2) {
     stop("'travel_list' must contain at least two locations.")
   }
@@ -113,7 +129,6 @@ total_exposure <- function(
     stop("The directory specified in 'dir' does not exist.")
   }
 
-  df_output <- data.frame()
   rbind_df_1 <- data.frame()
 
   rbind_route_select <- data.frame()
@@ -121,8 +136,6 @@ total_exposure <- function(
   # Calculate exposure for each daily trip
 
   for (i in 1:length(travel_list$long)) {
-    print(paste("Point", i, sep = " "))
-
     # First trip: use the departure time provided by the user
 
     if (i == 1) {
@@ -630,11 +643,6 @@ total_exposure <- function(
   pal <- leaflet::colorFactor(
     palette_route,
     domain = rbind_df_1$i
-  )
-
-  circle_pal <- leaflet::colorFactor(
-    palette_route,
-    domain = travel_list$id
   )
 
   # Create interactive map

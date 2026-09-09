@@ -17,16 +17,16 @@
 # Function to convert minutes to HH:MM format
 
 function_hours <- function(minutes) {
-  if (!is.numeric(minutes)) {
-    stop("'minutes' must be numeric.")
-  }
-
   if (length(minutes) != 1) {
     stop("'minutes' must be a single numeric value.")
   }
 
   if (is.na(minutes)) {
     stop("'minutes' cannot be NA.")
+  }
+
+  if (!is.numeric(minutes)) {
+    stop("'minutes' must be numeric.")
   }
 
   if (minutes < 0) {
